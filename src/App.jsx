@@ -11,30 +11,24 @@ import Register from './pages/Register';
 import Access from './pages/Access';
 import Admin from './pages/Admin';
 
+function Layout({ children }) {
+  return <Navbar>{children}</Navbar>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AdminProvider>
         <AppProvider>
           <Routes>
-            {/* Админка — без Navbar */}
             <Route path="/admin" element={<Admin />} />
-
-            {/* Публичная часть */}
-            <Route path="/*" element={
-              <div className="min-h-screen bg-[#F8F7FF]">
-                <Navbar />
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/modules" element={<Modules />} />
-                  <Route path="/lesson/:id" element={<Lesson />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/access" element={<Access />} />
-                </Routes>
-              </div>
-            } />
+            <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/modules" element={<Layout><Modules /></Layout>} />
+            <Route path="/lesson/:id" element={<Layout><Lesson /></Layout>} />
+            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+            <Route path="/login" element={<Layout><Login /></Layout>} />
+            <Route path="/register" element={<Layout><Register /></Layout>} />
+            <Route path="/access" element={<Layout><Access /></Layout>} />
           </Routes>
         </AppProvider>
       </AdminProvider>

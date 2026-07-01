@@ -1,173 +1,136 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useCourse } from '../context/AdminContext';
-import { PlayCircle, Clock, BookOpen, ChevronRight, CheckCircle } from 'lucide-react';
+import { ChevronRight, BookOpen } from 'lucide-react';
+
+const GRADIENTS = [
+  'from-red-500 to-orange-400',
+  'from-purple-600 to-violet-500',
+  'from-blue-600 to-cyan-400',
+  'from-emerald-500 to-teal-400',
+  'from-pink-500 to-rose-400',
+  'from-yellow-500 to-amber-400',
+];
 
 export default function Home() {
-  const { user } = useApp();
+  const { user, getAllLessons, completedLessons } = useApp();
   const course = useCourse();
   if (!course) return null;
 
+  const allLessons = getAllLessons();
+  const totalLessons = allLessons.length;
+  const progress = totalLessons > 0
+    ? Math.round((completedLessons.length / totalLessons) * 100)
+    : 0;
+
+  const nextLesson = allLessons.find(l => !completedLessons.includes(l.id));
+
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-purple-700 to-purple-900 text-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block bg-purple-500/30 text-purple-100 text-sm font-medium px-3 py-1 rounded-full mb-6">
-            Онлайн-курс
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            {course.title}
-          </h1>
-          <p className="text-lg md:text-xl text-purple-200 mb-10 max-w-2xl mx-auto">
-            {course.description}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
+    <div className="px-5 space-y-6">
+
+      {/* Карточка курса (главная) */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-red-500 via-orange-500 to-yellow-400 p-5 min-h-[160px] flex flex-col justify-between">
+        <div className="flex items-start justify-between">
+          <div className="bg-white/20 rounded-2xl p-2.5">
+            <BookOpen size={22} className="text-white" />
+          </div>
+        </div>
+        <div>
+          <p className="text-white/80 text-xs font-medium mb-1 uppercase tracking-wider">Текущий курс</p>
+          <h2 className="text-white font-bold text-xl leading-tight mb-3">{course.title}</h2>
+          {user && totalLessons > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-white/70 text-xs">Прогресс</span>
+                <span className="text-white font-bold text-xs">{progress}%</span>
+              </div>
+              <div className="w-full bg-white/25 rounded-full h-1.5">
+                <div
+                  className="bg-white h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Быстрые действия */}
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { label: 'Все модули', path: '/modules', gradient: 'from-[#1e1e2e] to-[#252535]', icon: '📚' },
+          { label: nextLesson ? 'Продолжить' : 'Начать', path: nextLesson ? `/lesson/${nextLesson.id}` : '/modules', gradient: 'from-violet-600 to-purple-700', icon: '▶️' },
+        ].map((item, i) => (
+          <Link
+            key={i}
+            to={item.path}
+            className={`bg-gradient-to-br ${item.gradient} rounded-2xl p-4 flex flex-col justify-between min-h-[90px] border border-white/5`}
+          >
+            <span className="text-2xl">{item.icon}</span>
+            <span className="text-white font-semibold text-sm">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Модули курса */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-white font-bold text-base">Программа курса</h3>
+          <Link to="/modules" className="text-gray-400 text-xs flex items-center gap-1 hover:text-white transition-colors">
+            Все <ChevronRight size={14} />
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          {course.modules.map((mod, i) => {
+            const done = mod.lessons.filter(l => completedLessons.includes(l.id)).length;
+            const pct = mod.lessons.length > 0 ? Math.round((done / mod.lessons.length) * 100) : 0;
+            const gradient = GRADIENTS[i % GRADIENTS.length];
+            const firstLesson = mod.lessons[0];
+
+            return (
               <Link
-                to="/modules"
-                className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl text-lg hover:bg-yellow-300 transition-colors"
+                key={mod.id}
+                to={firstLesson ? `/lesson/${firstLesson.id}` : '/modules'}
+                className="flex items-center gap-4 bg-[#17171f] rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-colors"
               >
-                Продолжить обучение
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/register"
-                  className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl text-lg hover:bg-yellow-300 transition-colors"
-                >
-                  Начать обучение
-                </Link>
-                <Link
-                  to="/modules"
-                  className="border border-white/40 text-white font-medium px-8 py-4 rounded-xl text-lg hover:bg-white/10 transition-colors"
-                >
-                  Смотреть программу
-                </Link>
-              </>
-            )}
-          </div>
+                {/* Цветной квадрат */}
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex-shrink-0 flex items-center justify-center text-white font-bold text-lg`}>
+                  {mod.id}
+                </div>
 
-          <div className="flex flex-wrap justify-center gap-8 mt-12 text-purple-200">
-            <div className="flex items-center gap-2">
-              <Clock size={18} />
-              <span>{course.duration}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BookOpen size={18} />
-              <span>{course.lessons} уроков</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <PlayCircle size={18} />
-              <span>Видео + практика</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Что вы получите */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12">
-            Что вы получите
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: '🎯', title: 'Практические навыки', desc: 'Каждый урок — это теория + задание. Вы сразу применяете знания.' },
-              { icon: '📐', title: 'Системный подход', desc: 'Не хаотичный набор советов, а стройная система знаний о дизайне.' },
-              { icon: '🚀', title: 'Готовый проект', desc: 'К концу курса у вас будет портфолио с реальными работами.' },
-            ].map((item, i) => (
-              <div key={i} className="bg-purple-50 rounded-2xl p-6">
-                <div className="text-3xl mb-3">{item.icon}</div>
-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Программа курса */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
-            Программа курса
-          </h2>
-          <p className="text-center text-gray-500 mb-10">
-            {course.modules.length} модуля · {course.lessons} уроков
-          </p>
-
-          <div className="space-y-4">
-            {course.modules.map((mod) => (
-              <div key={mod.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-medium text-purple-600 uppercase tracking-wider">
-                      Модуль {mod.id}
-                    </span>
-                    <h3 className="font-bold text-gray-900 mt-0.5">{mod.title}</h3>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm truncate">{mod.title}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    {done}/{mod.lessons.length} уроков
+                  </p>
+                  <div className="w-full bg-white/10 rounded-full h-1 mt-2">
+                    <div
+                      className={`bg-gradient-to-r ${gradient} h-1 rounded-full transition-all`}
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
-                  <span className="text-sm text-gray-400">{mod.lessons.length} уроков</span>
                 </div>
-                <div className="border-t border-gray-50">
-                  {mod.lessons.map((lesson, i) => (
-                    <div key={lesson.id} className={`flex items-center gap-3 px-6 py-3 ${i < mod.lessons.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                      <CheckCircle size={16} className={lesson.free ? 'text-green-500' : 'text-gray-300'} />
-                      <span className="text-sm text-gray-700">{lesson.title}</span>
-                      {lesson.free && (
-                        <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                          Бесплатно
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
 
-          <div className="text-center mt-10">
-            <Link
-              to={user ? '/modules' : '/register'}
-              className="inline-flex items-center gap-2 bg-purple-700 text-white font-bold px-8 py-4 rounded-xl hover:bg-purple-800 transition-colors"
-            >
-              {user ? 'Перейти к урокам' : 'Начать бесплатно'}
-              <ChevronRight size={18} />
-            </Link>
-          </div>
+                <ChevronRight size={16} className="text-gray-600 flex-shrink-0" />
+              </Link>
+            );
+          })}
         </div>
-      </section>
+      </div>
 
-      {/* Автор */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-8">
-          <div className="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-4xl flex-shrink-0">
-            👩‍🎨
-          </div>
-          <div>
-            <p className="text-sm text-purple-600 font-medium mb-1">Автор курса</p>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{course.author}</h3>
-            <p className="text-gray-600">
-              Дизайнер с 8-летним опытом. Работала с брендами из Fortune 500. Преподаёт дизайн-мышление и визуальные коммуникации.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
+      {/* CTA для незарегистрированных */}
       {!user && (
-        <section className="py-16 px-4 bg-purple-700 text-white text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Готовы начать?
-          </h2>
-          <p className="text-purple-200 mb-8">Первые 2 урока — бесплатно. Без карты.</p>
+        <div className="bg-gradient-to-br from-violet-600 to-purple-800 rounded-3xl p-5 text-center">
+          <p className="text-white font-bold text-lg mb-1">Начни бесплатно</p>
+          <p className="text-purple-200 text-sm mb-4">Первые 2 урока открыты без регистрации</p>
           <Link
             to="/register"
-            className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl text-lg hover:bg-yellow-300 transition-colors inline-block"
+            className="inline-block bg-white text-purple-700 font-bold text-sm px-6 py-3 rounded-xl hover:bg-purple-50 transition-colors"
           >
-            Зарегистрироваться бесплатно
+            Зарегистрироваться
           </Link>
-        </section>
+        </div>
       )}
     </div>
   );

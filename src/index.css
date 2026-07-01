@@ -7,11 +7,15 @@
 body {
   margin: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background: #F8F7FF;
-  color: #1a1a2e;
+  background: #0f0f13;
+  color: #ffffff;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
 }
+
+/* Скрытие скроллбара */
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
