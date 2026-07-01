@@ -73,8 +73,9 @@ export default function Modules() {
                   const done = completedLessons.includes(lesson.id);
                   const accessible = canAccessLesson(lesson);
 
+                  const target = accessible ? `/lesson/${lesson.id}` : '/access';
                   return (
-                    <div key={lesson.id} className={`flex items-center gap-3 px-4 py-3.5 ${!accessible ? 'opacity-50' : ''}`}>
+                    <Link key={lesson.id} to={target} className={`flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors ${!accessible ? 'opacity-50' : ''}`}>
                       <div className="flex-shrink-0">
                         {done
                           ? <CheckCircle size={18} className="text-emerald-400" />
@@ -84,23 +85,15 @@ export default function Modules() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-medium truncate">{lesson.title}</p>
-                        <p className="text-gray-500 text-xs mt-0.5 capitalize">{lesson.type.replace('+', ' + ')}</p>
+                        <p className="text-gray-500 text-xs mt-0.5">{lesson.type.replace('video', 'Видео').replace('text', 'Текст').replace('task', 'Задание').replace('practice', 'Практика').replace(/\+/g, '·')}</p>
                       </div>
                       <div className="flex-shrink-0 flex items-center gap-2">
                         {lesson.free && !user && (
                           <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">Free</span>
                         )}
-                        {accessible ? (
-                          <Link to={`/lesson/${lesson.id}`} className="text-gray-500 hover:text-white transition-colors">
-                            <ChevronRight size={16} />
-                          </Link>
-                        ) : (
-                          <Link to="/access" className="text-gray-600 hover:text-violet-400 transition-colors">
-                            <ChevronRight size={16} />
-                          </Link>
-                        )}
+                        <ChevronRight size={16} className="text-gray-600" />
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
