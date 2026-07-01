@@ -64,10 +64,10 @@ export function AppProvider({ children }) {
 
   function canAccessLesson(lesson) {
     if (lesson.free) return true;
-    if (!user) return false;
     const all = getAllLessons();
     const idx = all.findIndex(l => l.id === lesson.id);
     if (idx < (course?.freeUntil ?? 2)) return true;
+    if (!user) return false;
     return hasFullAccess;
   }
 
