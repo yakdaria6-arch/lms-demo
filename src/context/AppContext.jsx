@@ -23,7 +23,7 @@ export function AppProvider({ children }) {
   const [homeworks, setHomeworks] = useState(() => loadState()?.homeworks || {});
   const [accessCode, setAccessCode] = useState(() => loadState()?.accessCode || '');
 
-  const hasFullAccess = accessCode === 'DEMO2024' || user?.role === 'full';
+  const hasFullAccess = user && (accessCode === 'DEMO2024' || user?.role === 'full');
 
   useEffect(() => {
     localStorage.setItem(
