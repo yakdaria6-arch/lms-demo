@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { course, getAllLessons } from '../data/course';
+import { useCourse } from '../context/AdminContext';
 import { CheckCircle, BookOpen, Send, ChevronRight } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, completedLessons, homeworks, progress, totalLessons } = useApp();
+  const { user, completedLessons, homeworks, progress, totalLessons, getAllLessons } = useApp();
+  const course = useCourse();
 
   if (!user) {
     return (
@@ -19,6 +20,7 @@ export default function Dashboard() {
 
   const hwCount = Object.keys(homeworks).length;
   const allLessons = getAllLessons();
+  if (!course) return null;
   const nextLesson = allLessons.find(l => !completedLessons.includes(l.id));
 
   return (

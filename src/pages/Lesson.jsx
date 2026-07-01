@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { getLessonById, getAdjacentLessons } from '../data/course';
+import { useCourse } from '../context/AdminContext';
 import { CheckCircle, ChevronLeft, ChevronRight, Lock, Send } from 'lucide-react';
 
 function Quiz({ questions }) {
@@ -126,10 +126,14 @@ function renderMarkdown(text) {
 export default function Lesson() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { canAccessLesson, completeLesson, completedLessons, submitHomework, homeworks, user } = useApp();
+  const { canAccessLesson, completeLesson, completedLessons, submitHomework, homeworks, user, getAllLessons } = useApp();
+  const course = useCourse();
 
-  const lesson = getLessonById(id);
-  const { prev, next } = getAdjacentLessons(id);
+  const allLessons = getAllLessons();
+  const lesson = allLessons.find(l => l.id === id);
+  const idx = allLessons.findIndex(l => l.id === id);
+  const prev = idx > 0 ? allLessons[idx - 1] : null;
+  const next = idx < allLessons.length - 1 ? allLessons[idx + 1] : null;
   const [hwText, setHwText] = useState('');
   const [hwSent, setHwSent] = useState(false);
 

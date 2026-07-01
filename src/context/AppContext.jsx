@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getAllLessons, course } from '../data/course';
+import { useCourse } from './AdminContext';
 
 const AppContext = createContext(null);
 
@@ -15,6 +15,7 @@ function loadState() {
 }
 
 export function AppProvider({ children }) {
+  const course = useCourse();
   const [user, setUser] = useState(() => loadState()?.user || null);
   const [completedLessons, setCompletedLessons] = useState(
     () => loadState()?.completedLessons || []
@@ -30,6 +31,11 @@ export function AppProvider({ children }) {
       JSON.stringify({ user, completedLessons, homeworks, accessCode })
     );
   }, [user, completedLessons, homeworks, accessCode]);
+
+  function getAllLessons() {
+    if (!course) return [];
+    return course.modules.flatMap(m => m.lessons);
+  }
 
   function login(name, email) {
     setUser({ name, email, role: 'free' });
@@ -61,7 +67,7 @@ export function AppProvider({ children }) {
     if (!user) return false;
     const all = getAllLessons();
     const idx = all.findIndex(l => l.id === lesson.id);
-    if (idx < course.freeUntil) return true;
+    if (idx < (course?.freeUntil ?? 2)) return true;
     return hasFullAccess;
   }
 
@@ -83,6 +89,7 @@ export function AppProvider({ children }) {
       applyCode,
       hasFullAccess,
       canAccessLesson,
+      getAllLessons,
       progress,
       totalLessons,
     }}>

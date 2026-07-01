@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { course } from '../data/course';
+import { useCourse } from '../context/AdminContext';
 import { PlayCircle, Clock, BookOpen, ChevronRight, CheckCircle } from 'lucide-react';
 
 export default function Home() {
   const { user } = useApp();
+  const course = useCourse();
+  if (!course) return null;
 
   return (
     <div>

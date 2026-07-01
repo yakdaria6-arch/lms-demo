@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { course, getAllLessons } from '../data/course';
+import { useCourse } from '../context/AdminContext';
 import { Lock, CheckCircle, PlayCircle, ChevronRight } from 'lucide-react';
 
 export default function Modules() {
-  const { completedLessons, canAccessLesson, user } = useApp();
+  const { completedLessons, canAccessLesson, user, getAllLessons } = useApp();
+  const course = useCourse();
   const allLessons = getAllLessons();
 
   return (
